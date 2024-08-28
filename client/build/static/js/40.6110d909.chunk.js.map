@@ -1,0 +1,1 @@
+{"version":3,"file":"static/js/40.6110d909.chunk.js","mappings":"iJAEA,MAMA,EANeA,KAEXC,EAAAA,EAAAA,KAAA,OAAAC,SAAK,U","sources":["admin/Report.js"],"sourcesContent":["import React from 'react'\r\n\r\nconst Report = () => {\r\n  return (\r\n    <div>Report</div>\r\n  )\r\n}\r\n\r\nexport default Report"],"names":["Report","_jsx","children"],"sourceRoot":""}
