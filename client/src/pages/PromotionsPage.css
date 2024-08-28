@@ -1,0 +1,16 @@
+.promotion-packages-container {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3182ce transparent;
+  }
+  
+  .promotion-packages-container::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .promotion-packages-container::-webkit-scrollbar-thumb {
+    background-color: #3182ce;
+    border-radius: 4px;
+  }
+  
