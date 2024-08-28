@@ -5,10 +5,9 @@ const dotenv = require('dotenv');
 const connectToDatabase = require('./config/db');
 const verifyToken = require('./middleware/verifyToken');
 const path = require('path');
-const twilio = require('twilio');
-const helmet = require('helmet');
+const twilio = require('twilio'); // Import Twilio
 
-// Load environment variables
+// Load environment variables from .env file
 dotenv.config();
 
 // Initialize Express app
@@ -17,44 +16,64 @@ const app = express();
 // Connect to MongoDB
 connectToDatabase();
 
-// Middleware (Permissive CORS for development - adjust for production)
-app.use(cors()); 
-app.use(express.json());
-app.use(helmet());
+// Middleware
+app.use(cors()); // No longer restricting origin
+app.use(express.json()); // Parse JSON bodies
 
 // Twilio configuration
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-// Route imports 
-// ... (rest of the route imports remain the same)
+// Route imports
+const adminRoutes = require('./routes/adminRoutes');
+const companyRoutes = require('./routes/companyRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const promotionSetupRoutes = require('./routes/promotionSetupRoutes');
 
-// Serve static files
+// Serve static files from 'uploads' directory
 app.use('/uploads', express.static('uploads'));
 
-// Example route for sending SMS 
-app.post('/api/send-sms', verifyToken, async (req, res) => {
-    // ... (rest of the SMS sending logic remains the same)
+// Example route for sending SMS
+app.post('/api/send-sms', verifyToken, (req, res) => {
+  const { to, message } = req.body;
+
+  // Use Twilio to send the SMS
+  twilioClient.messages
+    .create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER, // Your Twilio phone number
+      to: to
+    })
+    .then((message) => res.status(200).json({ success: true, message: `Message sent: ${message.sid}` }))
+    .catch((error) => {
+      console.error('Error sending SMS:', error);
+      res.status(500).json({ success: false, error: error.message });
+    });
 });
 
 // Define routes
-// ... (rest of the route definitions remain the same)
+app.use('/api/admins', adminRoutes);
+app.use('/api/companies', companyRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/promotions', promotionSetupRoutes);
 
-// Serve static files from the 'build' folder
-app.use(express.static(path.join(__dirname, 'build')));
+// Serve static files from the React app's build folder
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Handle frontend routes
 app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+  res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong', error: err.message });
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong', error: err.message });
 });
 
 // Start the server
 const PORT = process.env.PORT || 3005;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
